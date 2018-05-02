@@ -1,7 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Main where
+module Net.Spacehask
+        ( Launch(..)
+        , getLaunchData
+        ) where
 
 import Data.Aeson
 import Network.HTTP.Conduit
@@ -14,6 +17,7 @@ data Launch = Launch { launch_date    :: String
                      , details        :: String
                     } deriving (Show)
 
+-- | Nested JSON
 instance FromJSON Launch where
   parseJSON = withObject "Launch" $ \o -> do
     launch_date <- o .: "launch_date_local"
@@ -35,11 +39,3 @@ getLaunchData :: (FromJSON a) => String -> IO (Maybe a)
 getLaunchData url = do
   obj <- simpleHttp latestURL
   return $ decode obj
-
-main :: IO ()
-main = do
-  resp <- getLaunchData latestURL
-  case resp of
-   Nothing -> print $ "No data"
-   Just (Launch{..}) -> do
-    print $ "Launch date: " ++ launch_date
